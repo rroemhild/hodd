@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Homie Device Discovery</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-vue.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+      <a class="navbar-brand" href="#">Homie Device Discovery</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
+        </ul>
+        <div id="client_status">
+          <h3><span :class="badge_appearance()" class="badge">{{ message }}</span></h3>
+        </div>
+      </div>
+    </nav>
+
+    <main role="main" class="container-fluid">
+      <div class="row" id="device">
+
+        <div id="card-col" class="col-md-6 col-lg-4 col-xl-3"
+          v-for="(device, index) in deviceList"
+          v-bind:device="device"
+        >
+
+          <div class="card">
+            <h6 class="card-header">{{ device.name }}
+              <span :class="badge_appearance(device.state)" class="float-right badge">{{ device.state }}</span>
+            </h6>
+
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item">Devicde ID:
+                <span class="float-right">{{ device.id }}</span>
+              </li>
+              <li class="list-group-item">Homie Version:
+                <span class="float-right">{{ device.homie }}</span>
+              </li>
+              <li class="list-group-item">Firmware:
+                <span class="float-right" v-b-popover.hover.bottomleft.v-info="device.implementation" title="Implementation">{{ device.fw_name }} v{{ device.fw_version }}</span>
+              </li>
+              <li class="list-group-item">IP Address:
+                <span class="float-right" v-b-popover.hover.bottomleft.v-info="device.mac" title="MAC  Address">{{ device.localip }}</span>
+              </li>
+              <li class="list-group-item">Uptime:
+                <span class="float-right" v-b-popover.hover.bottomleft.v-info="device.stats_interval + ' seconds'" title="Stats interval">{{ timeSince(device.stats_uptime) }}</span>
+              </li>
+              <li class="list-group-item">Free heap:
+                <span class="float-right">{{ device.stats_freeheap }}</span>
+              </li>
+            </ul>
+
+            <div class="card-footer">
+
+              <div class="card-text" v-for="(node, index) in device.nodes"
+                  v-bind:node="node"
+                  ><h6>Node: {{ node.name }}</h6>
+                  <ul class="list-group">
+                    <li class="list-group-item"
+                        v-for="(property, index) in node.properties"
+                        v-bind:property="property"
+                    >
+                    <span v-b-popover.hover.bottomright.v-info="property.topic" title="Topic">{{ property.id }}:</span>
+                      <span class="float-right" v-b-popover.hover.bottomleft.v-info="property.datatype + ' (' + property.format + ')'" title="Datatype">{{ property.state }}</span>
+                    </li>
+                  </ul>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="settings.js" type="text/javascript"></script>
+    <script src="js/vue.min.js" type="text/javascript"></script>
+    <script src="js/bootstrap-vue.min.js" type="text/javascript"></script>
+    <script src="js/paho-mqtt.js" type="text/javascript"></script>
+    <script src="js/app.js" type="text/javascript"></script>
+  </body>
+</html>
