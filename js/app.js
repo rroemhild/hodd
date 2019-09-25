@@ -12,6 +12,13 @@ var devices = new Vue({
     deviceList: {}
   },
   methods: {
+    toggle: function(topic, event) {
+      var set_topic = topic + "/set";
+      message = new Paho.Message(event);
+      message.destinationName = set_topic;
+      message.retained = false;
+      client.send(message);
+    },
     badge_appearance: function(state) {
       if (state === "init") {
         return "badge-info";

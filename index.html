@@ -116,12 +116,29 @@
                       title="Topic"
                       >{{ property.id }}:</span
                     >
-                    <span
-                      class="float-right"
-                      v-b-popover.hover.bottomleft.v-info="property.datatype + ' (' + property.format + ')'"
-                      title="Datatype"
-                      >{{ property.state }}</span
-                    >
+                    <span class="float-right">
+                      <span
+                        v-if="property.datatype === 'boolean' || property.datatype === 'bool'"
+                      >
+                        <b-form-checkbox
+                          @change="toggle(property.topic, $event)"
+                          v-model="property.state"
+                          v-bind:id="device.id + node.name + property.id"
+                          name="id"
+                          value="true"
+                          unchecked-value="false"
+                          switch
+                        >
+                        </b-form-checkbox>
+                      </span>
+                      <span
+                        v-else
+                        v-b-popover.hover.bottomleft.v-info="property.datatype + ' (' + property.format + ')'"
+                        title="Datatype"
+                      >
+                        {{ property.state }}
+                      </span>
+                    </span>
                   </li>
                 </ul>
               </div>

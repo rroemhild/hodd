@@ -2,7 +2,7 @@
 
 HoDD is a simple client-side (Browser) app to discover [Homie](https://homieiot.github.io) devices. It's a little helper for developing Homie devices or just to spot the amount of Homie devices you are running at home.
 
-Currently supports [Homie convention v3.0.1](https://github.com/homieiot/convention/releases/tag/v3.0.1) (without arrays).
+Currently supports [Homie convention v3.0.1](https://github.com/homieiot/convention/releases/tag/v3.0.1) (without arrays) and Homie v4.0.0 with legacy extensions.
 
 
 ### What's included
