@@ -111,54 +111,56 @@
                 v-bind:node="node"
               >
                 <h6>Node: {{ node.name }}</h6>
-                <ul class="list-group">
-                  <li
-                    class="list-group-item"
-                    v-for="(property, index) in node.properties"
-                    v-bind:property="property"
-                  >
-                    <span
-                      v-b-popover.hover.bottomright.v-info="property.topic"
-                      title="Topic"
-                      >{{ property.id }}:</span
+                <p>
+                  <ul class="list-group">
+                    <li
+                      class="list-group-item"
+                      v-for="(property, index) in node.properties"
+                      v-bind:property="property"
                     >
-                    <span class="float-right">
-                      <!-- boolean datatype -->
                       <span
-                        v-if="property.datatype === 'boolean' || property.datatype === 'bool'"
+                        v-b-popover.hover.bottomright.v-info="property.topic"
+                        title="Topic"
+                        >{{ property.id }}:</span
                       >
-                        <b-form-checkbox
-                          @change="toggle(property.topic, $event)"
-                          v-model="property.state"
-                          v-bind:id="device.id + node.name + property.id"
-                          name="id"
-                          value="true"
-                          unchecked-value="false"
-                          :disabled="property.settable === 'false'"
-                          switch
+                      <span class="float-right">
+                        <!-- boolean datatype -->
+                        <span
+                          v-if="property.datatype === 'boolean' || property.datatype === 'bool'"
                         >
-                        </b-form-checkbox>
-                      </span>
-                      <span v-else-if="property.datatype === 'enum' && property.settable === 'true'">
-                        <b-form-select
-                          v-model="property.state"
-                          :options="formatToArray(property.format)"
-                          size="sm"
-                          @change="toggle(property.topic, $event)"
+                          <b-form-checkbox
+                            @change="toggle(property.topic, $event)"
+                            v-model="property.state"
+                            v-bind:id="device.id + node.name + property.id"
+                            name="id"
+                            value="true"
+                            unchecked-value="false"
+                            :disabled="property.settable === 'false'"
+                            switch
+                          >
+                          </b-form-checkbox>
+                        </span>
+                        <span v-else-if="property.datatype === 'enum' && property.settable === 'true'">
+                          <b-form-select
+                            v-model="property.state"
+                            :options="formatToArray(property.format)"
+                            size="sm"
+                            @change="toggle(property.topic, $event)"
+                          >
+                          </b-form-select>
+                        </span>
+                        <!-- everthing not catched above -->
+                        <span
+                          v-else
+                          v-b-popover.hover.bottomleft.v-info="property.datatype + ' (' + property.format + ')'"
+                          title="Datatype"
                         >
-                        </b-form-select>
+                          {{ property.state }}<span v-if="property.unit">{{ property.unit }}</span>
+                        </span>
                       </span>
-                      <!-- everthing not catched above -->
-                      <span
-                        v-else
-                        v-b-popover.hover.bottomleft.v-info="property.datatype + ' (' + property.format + ')'"
-                        title="Datatype"
-                      >
-                        {{ property.state }}<span v-if="property.unit">{{ property.unit }}</span>
-                      </span>
-                    </span>
-                  </li>
-                </ul>
+                    </li>
+                  </ul>
+                </p>
               </div>
             </div>
           </div>
