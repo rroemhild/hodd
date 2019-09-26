@@ -49,11 +49,17 @@
           <div class="card">
             <h6 class="card-header">
               {{ device.name }}
-              <span
-                :class="badge_appearance(device.state)"
-                class="float-right badge"
-                >{{ device.state }}</span
-              >
+              <div class="float-right">
+                  <b-badge
+                    v-if="device.state === 'lost'"
+                    href="#"
+                    variant="danger"
+                    @click="wipeDevice(device.id)"
+                  >wipe</b-badge>
+                  <b-badge
+                    v-bind:variant="badge_appearance(device.state)"
+                  >{{ device.state }}</b-badge>
+              </div>
             </h6>
 
             <ul class="list-group list-group-flush">

@@ -5,6 +5,9 @@
  * Released under the MIT License.
  */
 
+
+var deviceTopics = {};
+
 // vue
 var devices = new Vue({
   el: "#device",
@@ -21,17 +24,17 @@ var devices = new Vue({
     },
     badge_appearance: function(state) {
       if (state === "init") {
-        return "badge-info";
+        return "info";
       } else if (state === "ready") {
-        return "badge-success";
+        return "success";
       } else if (state === "lost") {
-        return "badge-warning";
+        return "warning";
       } else if (state === "dicsonnected") {
-        return "badge-secondary";
+        return "secondary";
       } else if (state === "sleeping") {
-        return "badge-primary";
+        return "primary";
       } else if (state === "alert") {
-        return "badge-danger";
+        return "danger";
       }
     },
     timeSince: function(secs) {
@@ -44,6 +47,17 @@ var devices = new Vue({
     },
     changeObjectItem: function() {
       this.$set(this.updated, true);
+    },
+    wipeDevice: function(deviceId) {
+      for (var i = 0; i < deviceTopics[deviceId].length; i++) {
+        message = new Paho.Message("");
+        message.destinationName = deviceTopics[deviceId][i];
+        message.retained = true;
+        client.send(message);
+      }
+
+      // reload the page )m
+      location.reload();
     }
   }
 });
@@ -121,6 +135,9 @@ function onMessageArrived(message) {
 
   // first message; add device to device list
   if (!(device_id in devices.deviceList)) {
+    // add topic to deviceTopics
+    deviceTopics[device_id] = [message.destinationName];
+
     devices.$set(devices.deviceList, device_id, {
       id: device_id,
       homie: payload,
@@ -134,7 +151,7 @@ function onMessageArrived(message) {
       stats_uptime: "",
       stats_freeheap: "",
       implementation: "",
-      nodes: {}
+      nodes: {},
     });
 
     // subscribe to device topics
@@ -142,6 +159,9 @@ function onMessageArrived(message) {
     client.subscribe(topic[0] + "/" + topic[1] + "/$fw/+");
     client.subscribe(topic[0] + "/" + topic[1] + "/$stats/+");
   } else {
+    // add topic to deviceTopics
+    deviceTopics[device_id].push(message.destinationName);
+
     // process attributes and payloads
     if (topic[2] === "$name") {
       devices.deviceList[device_id]["name"] = payload;
