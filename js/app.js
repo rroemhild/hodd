@@ -58,9 +58,15 @@ var devices = new Vue({
 
       // reload the page )m
       location.reload();
-    }
+    },
+    formatToArray: function(csv) {
+      // comma seperated value
+      var new_array = csv.split(",");
+      return new_array;
+    },
   }
 });
+
 
 var client_status = new Vue({
   el: "#client_status",
@@ -78,6 +84,7 @@ var client_status = new Vue({
     }
   }
 });
+
 
 // MQTT Client
 var clientId =
