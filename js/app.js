@@ -8,12 +8,15 @@
 
 var deviceTopics = {};
 
+var colorPicker = VueColor.Compact;
+
 // vue
 var devices = new Vue({
   el: "#device",
   data: {
     deviceList: {}
   },
+  components: { 'color-picker': colorPicker, },
   methods: {
     toggle: function(topic, event) {
       var set_topic = topic + "/set";
@@ -64,6 +67,18 @@ var devices = new Vue({
       var new_array = csv.split(",");
       return new_array;
     },
+    stringToRGB: function(v) {
+      var rgb = v.split(",");
+      return {r: parseInt(rgb[0]), g: parseInt(rgb[1]), b: parseInt(rgb[2])};
+    },
+    updateRGBColor: function(t, v) {
+      var colorString = v.rgba.r + "," + v.rgba.g + "," + v.rgba.b;
+      var set_topic = t + "/set";
+      message = new Paho.Message(colorString);
+      message.destinationName = set_topic;
+      message.retained = false;
+      client.send(message);
+    }
   }
 });
 
@@ -104,7 +119,7 @@ var options = {
   onSuccess: onConnect,
   onFailure: doFail,
   reconnect: true,
-  timeout: 10
+  timeout: 10,
 };
 
 // connect the client
