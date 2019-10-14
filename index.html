@@ -121,8 +121,9 @@
                       <span
                         v-b-popover.hover.bottomright.v-info="property.topic"
                         title="Topic"
-                        >{{ property.id }}:</span
                       >
+                          {{ property.id }}:
+                      </span>
                       <span class="float-right">
                         <!-- boolean datatype -->
                         <span
@@ -141,11 +142,15 @@
                           </b-form-checkbox>
                         </span>
 
-                        <span v-else-if="property.datatype === 'color' && property.settable === 'true'">
-                            <color-picker :value="stringToRGB(property.state)" @input="updateRGBColor(property.topic, $event)"></color-picker>
+                        <span
+                          v-else-if="property.datatype === 'color' && property.settable === 'true'"
+                        >
+                          <color-picker :value="stringToRGB(property.state)" @input="updateRGBColor(property.topic, $event)"></color-picker>
                         </span>
 
-                        <span v-else-if="property.datatype === 'enum' && property.settable === 'true'">
+                        <span
+                          v-else-if="property.datatype === 'enum' && property.settable === 'true'"
+                        >
                           <b-form-select
                             v-model="property.state"
                             :options="formatToArray(property.format)"
@@ -155,7 +160,17 @@
                           </b-form-select>
                         </span>
 
-                      <!-- everthing not catched above -->
+                        <span
+                          v-else-if="property.settable === 'true'"
+                          >
+                            <b-form-input
+                              v-model="property.state"
+                              @input='updateInput(property.topic, $event)'
+                            >
+                            </b-form-input>
+                        </span>
+
+                      <!-- everything not catched above -->
                         <span
                           v-else
                           v-b-popover.hover.bottomleft.v-info="property.datatype + ' (' + property.format + ')'"
@@ -178,7 +193,6 @@
     <script src="js/vue.min.js" type="text/javascript"></script>
     <script src="js/bootstrap-vue.min.js" type="text/javascript"></script>
     <script src="js/paho-mqtt.js" type="text/javascript"></script>
-    <script src="js/verte.js" type="text/javascript"></script>
     <script src="js/vue-color.min.js" type="text/javascript"></script>
     <script src="js/app.js" type="text/javascript"></script>
   </body>
