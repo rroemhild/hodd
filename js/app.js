@@ -32,7 +32,7 @@ var devices = new Vue({
         return "success";
       } else if (state === "lost") {
         return "warning";
-      } else if (state === "dicsonnected") {
+      } else if (state === "disconnected") {
         return "secondary";
       } else if (state === "sleeping") {
         return "primary";
@@ -87,7 +87,7 @@ var client_status = new Vue({
   el: "#client_status",
   data: {
     connected: false,
-    message: "dicsonnected"
+    message: "disconnected"
   },
   methods: {
     badge_appearance: function(state) {
@@ -128,7 +128,7 @@ client.connect(options);
 function doFail(e) {
   console.log(e);
   client_status.connected = false;
-  client_status.message = "dicsonnected";
+  client_status.message = "disconnected";
 }
 
 // called when the client connects
