@@ -9,13 +9,14 @@ Currently supports [Homie convention v3.0.1](https://github.com/homieiot/convent
 
 * Runs complete in your browser, no server side setup
 * Auto discover devices and display them in cards with all the attributes, nodes and properties (read-only)
-* Horrible JavaScript and Vue.js source code, written by a SysAdmin learning something new
+* Support for boolean and enum datatypes, all other get renderd as text for now
+* Bonus: Horrible JavaScript and Vue.js source code, written by a SysAdmin learning something new
 
 
 ### In the future
 
 * Some kind of online settings to connect to a different broker quickly
-* Clickable node attributes to interact with your device node properties
+* Support more node properties to interact with your device
 * More bootstrap-vue, components, vue.js magic, etc.
 * Homie 4 support
 

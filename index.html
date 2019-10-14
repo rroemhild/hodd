@@ -140,9 +140,11 @@
                           >
                           </b-form-checkbox>
                         </span>
+
                         <span v-else-if="property.datatype === 'color' && property.settable === 'true'">
                             <color-picker :value="stringToRGB(property.state)" @input="updateRGBColor(property.topic, $event)"></color-picker>
                         </span>
+
                         <span v-else-if="property.datatype === 'enum' && property.settable === 'true'">
                           <b-form-select
                             v-model="property.state"
@@ -152,7 +154,8 @@
                           >
                           </b-form-select>
                         </span>
-                        <!-- everthing not catched above -->
+
+                      <!-- everthing not catched above -->
                         <span
                           v-else
                           v-b-popover.hover.bottomleft.v-info="property.datatype + ' (' + property.format + ')'"
