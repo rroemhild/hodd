@@ -11,7 +11,7 @@ var colorPicker = VueColor.Compact;
 
 // vue
 var devices = new Vue({
-  el: "#device",
+  el: "#app",
   data: {
     deviceList: {}
   },
@@ -97,9 +97,9 @@ var client_status = new Vue({
   methods: {
     badge_appearance: function(state) {
       if (this.connected === true) {
-        return "badge-success";
+        return "success";
       } else {
-        return "badge-warning";
+        return "warning";
       }
     }
   }
