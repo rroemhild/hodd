@@ -40,169 +40,184 @@
 
     <main role="main" class="container-fluid">
       <div class="row" id="device">
-        <div
+        <b-card-group
           id="card-col"
           class="col-md-6 col-lg-4 col-xl-3"
           v-for="(device, index) in deviceList"
           v-bind:device="device"
         >
-          <div class="card">
-            <h6 class="card-header">
-              {{ device.name }}
-              <div class="float-right">
-                <b-badge
-                  v-if="device.state === 'lost'"
-                  href="#"
-                  variant="danger"
-                  @click="wipeDevice(device.id)"
-                  >wipe</b-badge>
+          <b-card no-body>
+            <b-card-header>
+              <h6>
+                {{ device.name }}
+                <div class="float-right">
                   <b-badge
-                    v-bind:variant="badge_appearance(device.state)"
+                    v-if="device.state === 'lost'"
+                    href="#"
+                    variant="danger"
+                    @click="wipeDevice(device.id)"
+                    >wipe</b-badge
                   >
+                  <b-badge v-bind:variant="badge_appearance(device.state)">
                     {{ device.state }}
                   </b-badge>
-              </div>
-            </h6>
+                </div>
+              </h6>
+            </b-card-header>
 
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item">
-                Devicde ID:
-                <span class="float-right">{{ device.id }}</span>
-              </li>
-              <li class="list-group-item">
-                Homie Version:
-                <span class="float-right">{{ device.homie }}</span>
-              </li>
-              <li class="list-group-item">
-                Firmware:
-                <span
-                  class="float-right"
-                  v-b-popover.hover.bottomleft.v-info="device.implementation"
-                  title="Implementation"
-                  >{{ device.fw_name }} v{{ device.fw_version }}</span
-                >
-              </li>
-              <li class="list-group-item">
-                IP Address:
-                <span
-                  class="float-right"
-                  v-b-popover.hover.bottomleft.v-info="device.mac"
-                  title="MAC  Address"
-                  >{{ device.localip }}</span
-                >
-              </li>
-              <li class="list-group-item">
-                Uptime:
-                <span
-                  class="float-right"
-                  v-b-popover.hover.bottomleft.v-info="device.stats_interval + ' seconds'"
-                  title="Stats interval"
-                  >{{ timeSince(device.stats_uptime) }}</span
-                >
-              </li>
-              <li class="list-group-item">
-                Free heap:
-                <span class="float-right">{{ device.stats_freeheap }}</span>
-              </li>
-            </ul>
+            <b-tabs card small justified>
 
-            <div class="card-footer">
+              <b-tab title="Device">
+                <b-list-group>
+                  <b-list-group-item>
+                    Devicde ID:
+                    <span class="float-right">{{ device.id }}</span>
+                  </b-list-group-item>
+                  <b-list-group-item>
+                    Homie Version:
+                    <span class="float-right">{{ device.homie }}</span>
+                  </b-list-group-item>
+                  <b-list-group-item>
+                    Implementation:
+                    <span class="float-right">{{ device.implementation }}</span>
+                  </b-list-group-item>
+                </b-list-group>
+              </b-tab>
 
-              <div
-                class="card-text"
-                v-for="(node, index) in device.nodes"
-                v-bind:node="node"
-              >
-                <h6>Node: {{ node.name }}</h6>
-                <p>
-                  <ul class="list-group">
-                    <li
-                      class="list-group-item"
-                      v-for="(property, index) in node.properties"
-                      v-bind:property="property"
+              <b-tab title="Firmware">
+                <b-list-group>
+                  <b-list-group-item>
+                    Firmware Name:
+                    <span class="float-right">{{ device.fw_name }}</span>
+                  </b-list-group-item>
+                  <b-list-group-item>
+                    Firmware Version:
+                    <span class="float-right">v{{ device.fw_version }}</span>
+                  </b-list-group-item>
+                  <b-list-group-item>
+                    IP Address:
+                    <span class="float-right">{{ device.localip }}</span>
+                  </b-list-group-item>
+                  <b-list-group-item>
+                    MAC Address:
+                    <span class="float-right">{{ device.localip }}</span>
+                  </b-list-group-item>
+                </b-list-group>
+              </b-tab>
+
+              <b-tab title="Stats">
+                <b-list-group>
+                  <b-list-group-item>
+                    Uptime:
+                    <span class="float-right">
+                      {{ timeSince(device.stats_uptime) }}
+                    </span>
+                  </b-list-group-item>
+                  <b-list-group-item>
+                    Free heap:
+                    <span class="float-right">{{ device.stats_freeheap }}</span>
+                  </b-list-group-item>
+                  <b-list-group-item>
+                    Stats interval:
+                    <span class="float-right">
+                      {{ device.stats_interval }} seconds
+                    </span>
+                  </b-list-group-item>
+                </b-list-group>
+              </b-tab>
+
+              <b-tab title="Nodes" active>
+                <b-list-group
+                  id="card-col"
+                  v-for="(node, index) in device.nodes"
+                  v-bind:node="node"
+                >
+                  <h6>{{ node.name }}</h6>
+                  <b-list-group-item
+                    v-for="(property, index) in node.properties"
+                    v-bind:property="property"
+                  >
+                    <span
+                      v-b-popover.hover.bottomright.v-info="property.topic"
+                      title="Topic"
+                      @click="doCopy(property.topic, $event)"
                     >
+                      {{ property.id }}:
+                    </span>
+
+                    <span class="float-right">
+                      <!-- datatype: boolean -->
                       <span
-                        v-b-popover.hover.bottomright.v-info="property.topic"
-                        title="Topic"
+                        v-if="property.datatype === 'boolean' || property.datatype === 'bool'"
                       >
-                        {{ property.id }}:
+                        <b-form-checkbox
+                          @change="updateProperty(property.topic, $event)"
+                          v-model="property.state"
+                          v-bind:id="device.id + node.name + property.id"
+                          name="id"
+                          value="true"
+                          unchecked-value="false"
+                          :disabled="property.settable === 'false'"
+                          switch
+                        ></b-form-checkbox>
                       </span>
 
-                      <span class="float-right">
-
-                        <!-- datatype: boolean -->
-                        <span
-                          v-if="property.datatype === 'boolean' || property.datatype === 'bool'"
-                        >
-                          <b-form-checkbox
-                            @change="updateProperty(property.topic, $event)"
-                            v-model="property.state"
-                            v-bind:id="device.id + node.name + property.id"
-                            name="id"
-                            value="true"
-                            unchecked-value="false"
-                            :disabled="property.settable === 'false'"
-                            switch
-                          ></b-form-checkbox>
-                        </span>
-
-                        <!-- datatype: color, format: rgb -->
-                        <span
-                          v-else-if="property.datatype === 'color' && property.settable === 'true'"
-                        >
-                          <color-picker
-                            :value="stringToRGB(property.state)"
-                            @input="updateRGBColor(property.topic, $event)"
-                          ></color-picker>
-                        </span>
-
-                        <!-- datatype: enum -->
-                        <span
-                          v-else-if="property.datatype === 'enum' && property.settable === 'true'"
-                        >
-                          <b-form-select
-                            v-model="property.state"
-                            :options="formatToArray(property.format)"
-                            size="sm"
-                            @change="updateProperty(property.topic, $event)"
-                          ></b-form-select>
-                        </span>
-
-                        <!-- datatype, string, interger, float -->
-                        <span
-                          v-else-if="property.settable === 'true'"
-                          >
-                            <b-form-input
-                              v-model="property.state"
-                              @change='updateProperty(property.topic, $event)'
-                              style="width: 200px; text-align: right;"
-                            ></b-form-input>
-                        </span>
-
-                        <!-- everything not catched above -->
-                        <span
-                          v-else
-                          v-b-popover.hover.bottomleft.v-info="property.datatype + ' (' + property.format + ')'"
-                          title="Datatype"
-                        >
-                          {{ property.state }}<span v-if="property.unit">{{ property.unit }}</span>
-                        </span>
+                      <!-- datatype: color, format: rgb -->
+                      <span
+                        v-else-if="property.datatype === 'color' && property.settable === 'true'"
+                      >
+                        <color-picker
+                          :value="stringToRGB(property.state)"
+                          @input="updateRGBColor(property.topic, $event)"
+                        ></color-picker>
                       </span>
-                    </li>
-                  </ul>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+
+                      <!-- datatype: enum -->
+                      <span
+                        v-else-if="property.datatype === 'enum' && property.settable === 'true'"
+                      >
+                        <b-form-select
+                          v-model="property.state"
+                          :options="formatToArray(property.format)"
+                          size="sm"
+                          @change="updateProperty(property.topic, $event)"
+                        ></b-form-select>
+                      </span>
+
+                      <!-- datatype, string, interger, float -->
+                      <span v-else-if="property.settable === 'true'">
+                        <b-form-input
+                          v-model="property.state"
+                          @change="updateProperty(property.topic, $event)"
+                          style="width: 200px; text-align: right;"
+                        ></b-form-input>
+                      </span>
+
+                      <!-- everything not catched above -->
+                      <span
+                        v-else
+                        v-b-popover.hover.bottomleft.v-info="property.datatype + ' (' + property.format + ')'"
+                        title="Datatype"
+                      >
+                        {{ property.state }}
+                        <span v-if="property.unit">{{ property.unit }}</span>
+                      </span>
+                    </span>
+                  </b-list-group-item>
+                </b-list-group>
+              </b-tab>
+            </b-tabs>
+          </b-card>
+        </b-card-group>
       </div>
     </main>
 
     <script src="settings.js" type="text/javascript"></script>
     <script src="js/vue.min.js" type="text/javascript"></script>
     <script src="js/bootstrap-vue.min.js" type="text/javascript"></script>
-    <script src="js/paho-mqtt.js" type="text/javascript"></script>
     <script src="js/vue-color.min.js" type="text/javascript"></script>
+    <script src="js/vue-clipboard.min.js" type="text/javascript"></script>
+    <script src="js/paho-mqtt.js" type="text/javascript"></script>
     <script src="js/app.js" type="text/javascript"></script>
   </body>
 </html>

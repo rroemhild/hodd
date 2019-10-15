@@ -77,6 +77,13 @@ var devices = new Vue({
       message.destinationName = set_topic;
       message.retained = false;
       client.send(message);
+    },
+    doCopy: function (t, v) {
+      this.$copyText(t).then(function (e) {
+        // console.log(e)
+      }, function (e) {
+        console.log(e)
+      })
     }
   }
 });
