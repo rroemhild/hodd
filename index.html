@@ -50,15 +50,17 @@
             <h6 class="card-header">
               {{ device.name }}
               <div class="float-right">
-                  <b-badge
-                    v-if="device.state === 'lost'"
-                    href="#"
-                    variant="danger"
-                    @click="wipeDevice(device.id)"
+                <b-badge
+                  v-if="device.state === 'lost'"
+                  href="#"
+                  variant="danger"
+                  @click="wipeDevice(device.id)"
                   >wipe</b-badge>
                   <b-badge
                     v-bind:variant="badge_appearance(device.state)"
-                  >{{ device.state }}</b-badge>
+                  >
+                    {{ device.state }}
+                  </b-badge>
               </div>
             </h6>
 
@@ -105,6 +107,7 @@
             </ul>
 
             <div class="card-footer">
+
               <div
                 class="card-text"
                 v-for="(node, index) in device.nodes"
@@ -122,15 +125,17 @@
                         v-b-popover.hover.bottomright.v-info="property.topic"
                         title="Topic"
                       >
-                          {{ property.id }}:
+                        {{ property.id }}:
                       </span>
+
                       <span class="float-right">
-                        <!-- boolean datatype -->
+
+                        <!-- datatype: boolean -->
                         <span
                           v-if="property.datatype === 'boolean' || property.datatype === 'bool'"
                         >
                           <b-form-checkbox
-                            @change="toggle(property.topic, $event)"
+                            @change="updateProperty(property.topic, $event)"
                             v-model="property.state"
                             v-bind:id="device.id + node.name + property.id"
                             name="id"
@@ -138,16 +143,20 @@
                             unchecked-value="false"
                             :disabled="property.settable === 'false'"
                             switch
-                          >
-                          </b-form-checkbox>
+                          ></b-form-checkbox>
                         </span>
 
+                        <!-- datatype: color, format: rgb -->
                         <span
                           v-else-if="property.datatype === 'color' && property.settable === 'true'"
                         >
-                          <color-picker :value="stringToRGB(property.state)" @input="updateRGBColor(property.topic, $event)"></color-picker>
+                          <color-picker
+                            :value="stringToRGB(property.state)"
+                            @input="updateRGBColor(property.topic, $event)"
+                          ></color-picker>
                         </span>
 
+                        <!-- datatype: enum -->
                         <span
                           v-else-if="property.datatype === 'enum' && property.settable === 'true'"
                         >
@@ -155,22 +164,22 @@
                             v-model="property.state"
                             :options="formatToArray(property.format)"
                             size="sm"
-                            @change="toggle(property.topic, $event)"
-                          >
-                          </b-form-select>
+                            @change="updateProperty(property.topic, $event)"
+                          ></b-form-select>
                         </span>
 
+                        <!-- datatype, string, interger, float -->
                         <span
                           v-else-if="property.settable === 'true'"
                           >
                             <b-form-input
                               v-model="property.state"
-                              @input='updateInput(property.topic, $event)'
-                            >
-                            </b-form-input>
+                              @change='updateProperty(property.topic, $event)'
+                              style="width: 200px; text-align: right;"
+                            ></b-form-input>
                         </span>
 
-                      <!-- everything not catched above -->
+                        <!-- everything not catched above -->
                         <span
                           v-else
                           v-b-popover.hover.bottomleft.v-info="property.datatype + ' (' + property.format + ')'"

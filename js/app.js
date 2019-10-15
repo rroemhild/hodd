@@ -1,10 +1,9 @@
 /*!
- * HoDD v0.1.0
+ * HoDD v0.2.0
    Homie Device Discovery
  * (c) 2019 Rafael Römhild
  * Released under the MIT License.
  */
-
 
 var deviceTopics = {};
 
@@ -16,9 +15,9 @@ var devices = new Vue({
   data: {
     deviceList: {}
   },
-  components: { 'color-picker': colorPicker, },
+  components: { "color-picker": colorPicker },
   methods: {
-    toggle: function(topic, event) {
+    updateProperty: function(topic, event) {
       var set_topic = topic + "/set";
       message = new Paho.Message(event);
       message.destinationName = set_topic;
@@ -69,7 +68,7 @@ var devices = new Vue({
     },
     stringToRGB: function(v) {
       var rgb = v.split(",");
-      return {r: parseInt(rgb[0]), g: parseInt(rgb[1]), b: parseInt(rgb[2])};
+      return { r: parseInt(rgb[0]), g: parseInt(rgb[1]), b: parseInt(rgb[2]) };
     },
     updateRGBColor: function(t, v) {
       var colorString = v.rgba.r + "," + v.rgba.g + "," + v.rgba.b;
@@ -81,7 +80,6 @@ var devices = new Vue({
     }
   }
 });
-
 
 var client_status = new Vue({
   el: "#client_status",
@@ -99,7 +97,6 @@ var client_status = new Vue({
     }
   }
 });
-
 
 // MQTT Client
 var clientId =
@@ -119,7 +116,7 @@ var options = {
   onSuccess: onConnect,
   onFailure: doFail,
   reconnect: true,
-  timeout: 10,
+  timeout: 10
 };
 
 // connect the client
@@ -173,13 +170,13 @@ function onMessageArrived(message) {
       stats_uptime: "",
       stats_freeheap: "",
       implementation: "",
-      nodes: {},
+      nodes: {}
     });
 
     // subscribe to device topics
-    client.subscribe(topic[0] + "/" + topic[1] + "/+");
-    client.subscribe(topic[0] + "/" + topic[1] + "/$fw/+");
-    client.subscribe(topic[0] + "/" + topic[1] + "/$stats/+");
+    client.subscribe(`${topic[0]}/${topic[1]}/+`);
+    client.subscribe(`${topic[0]}/${topic[1]}/$fw/+`);
+    client.subscribe(`${topic[0]}/${topic[1]}/$stats/+`);
   } else {
     // add topic to deviceTopics
     deviceTopics[device_id].push(message.destinationName);
@@ -220,11 +217,9 @@ function onMessageArrived(message) {
           type: "",
           properties: {}
         });
-        client.subscribe(topic[0] + "/" + topic[1] + "/" + nodes[n] + "/$name");
-        client.subscribe(topic[0] + "/" + topic[1] + "/" + nodes[n] + "/$type");
-        client.subscribe(
-          topic[0] + "/" + topic[1] + "/" + nodes[n] + "/$properties"
-        );
+        client.subscribe(`${topic[0]}/${topic[1]}/${nodes[n]}/$name`);
+        client.subscribe(`${topic[0]}/${topic[1]}/${nodes[n]}/$type`);
+        client.subscribe(`${topic[0]}/${topic[1]}/${nodes[n]}/$properties`);
       }
     } else if (topic[2] in devices.deviceList[device_id]["nodes"]) {
       // add attributes to node
@@ -249,21 +244,11 @@ function onMessageArrived(message) {
               retained: "true",
               unit: "",
               state: "",
-              topic: ""
+              topic: `${topic[0]}/${topic[1]}/${topic[2]}/${properties[p]}`
             }
           );
           client.subscribe(
-            topic[0] + "/" + topic[1] + "/" + topic[2] + "/" + properties[p]
-          );
-          client.subscribe(
-            topic[0] +
-              "/" +
-              topic[1] +
-              "/" +
-              topic[2] +
-              "/" +
-              properties[p] +
-              "/+"
+            `${topic[0]}/${topic[1]}/${topic[2]}/${properties[p]}/#`
           );
         }
       } else if (
@@ -274,9 +259,6 @@ function onMessageArrived(message) {
           devices.deviceList[device_id]["nodes"][node]["properties"][property][
             "state"
           ] = payload;
-          devices.deviceList[device_id]["nodes"][node]["properties"][property][
-            "topic"
-          ] = message.destinationName;
         } else if (topic[4] === "$name") {
           devices.deviceList[device_id]["nodes"][node]["properties"][property][
             "name"
