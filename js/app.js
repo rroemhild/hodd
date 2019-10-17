@@ -9,6 +9,9 @@ var deviceTopics = {};
 
 var colorPicker = VueColor.Compact;
 
+var DISCOVERY_TOPIC = `${BASE_TOPIC}/+/$homie`
+
+
 // vue
 var devices = new Vue({
   el: "#app",
@@ -155,9 +158,9 @@ function onConnectionLost(responseObject) {
 function onMessageArrived(message) {
   // console.log("onMessageArrived: " + message.topic + " Payload: " + message.payloadString);
 
-  var topic = message.destinationName.split("/");
+  var topic = message.destinationName.slice(BASE_TOPIC.length + 1).split("/");
   var payload = message.payloadString;
-  var device_id = topic[1];
+  var device_id = topic[0];
 
   // first message; add device to device list
   if (!(device_id in devices.deviceList)) {
@@ -181,39 +184,39 @@ function onMessageArrived(message) {
     });
 
     // subscribe to device topics
-    client.subscribe(`${topic[0]}/${topic[1]}/+`);
-    client.subscribe(`${topic[0]}/${topic[1]}/$fw/+`);
-    client.subscribe(`${topic[0]}/${topic[1]}/$stats/+`);
+    client.subscribe(`${BASE_TOPIC}/${topic[0]}/+`);
+    client.subscribe(`${BASE_TOPIC}/${topic[0]}/$fw/+`);
+    client.subscribe(`${BASE_TOPIC}/${topic[0]}/$stats/+`);
   } else {
     // add topic to deviceTopics
     deviceTopics[device_id].push(message.destinationName);
 
     // process attributes and payloads
-    if (topic[2] === "$name") {
+    if (topic[1] === "$name") {
       devices.deviceList[device_id]["name"] = payload;
-    } else if (topic[2] === "$state") {
+    } else if (topic[1] === "$state") {
       devices.deviceList[device_id]["state"] = payload;
-    } else if (topic[2] === "$localip") {
+    } else if (topic[1] === "$localip") {
       devices.deviceList[device_id]["localip"] = payload;
-    } else if (topic[2] === "$mac") {
+    } else if (topic[1] === "$mac") {
       devices.deviceList[device_id]["mac"] = payload;
-    } else if (topic[2] === "$implementation") {
+    } else if (topic[1] === "$implementation") {
       devices.deviceList[device_id]["implementation"] = payload;
-    } else if (topic[2] === "$fw") {
-      if (topic[3] === "name") {
+    } else if (topic[1] === "$fw") {
+      if (topic[2] === "name") {
         devices.deviceList[device_id]["fw_name"] = payload;
-      } else if (topic[3] === "version") {
+      } else if (topic[2] === "version") {
         devices.deviceList[device_id]["fw_version"] = payload;
       }
-    } else if (topic[2] === "$stats") {
-      if (topic[3] === "uptime") {
+    } else if (topic[1] === "$stats") {
+      if (topic[2] === "uptime") {
         devices.deviceList[device_id]["stats_uptime"] = payload;
-      } else if (topic[3] === "interval") {
+      } else if (topic[2] === "interval") {
         devices.deviceList[device_id]["stats_interval"] = payload;
-      } else if (topic[3] === "freeheap") {
+      } else if (topic[2] === "freeheap") {
         devices.deviceList[device_id]["stats_freeheap"] = payload;
       }
-    } else if (topic[2] === "$nodes") {
+    } else if (topic[1] === "$nodes") {
       // add nodes to device object
       var nodes = payload.split(",");
       for (n in nodes) {
@@ -224,19 +227,19 @@ function onMessageArrived(message) {
           type: "",
           properties: {}
         });
-        client.subscribe(`${topic[0]}/${topic[1]}/${nodes[n]}/$name`);
-        client.subscribe(`${topic[0]}/${topic[1]}/${nodes[n]}/$type`);
-        client.subscribe(`${topic[0]}/${topic[1]}/${nodes[n]}/$properties`);
+        client.subscribe(`${BASE_TOPIC}/${topic[0]}/${nodes[n]}/$name`);
+        client.subscribe(`${BASE_TOPIC}/${topic[0]}/${nodes[n]}/$type`);
+        client.subscribe(`${BASE_TOPIC}/${topic[0]}/${nodes[n]}/$properties`);
       }
-    } else if (topic[2] in devices.deviceList[device_id]["nodes"]) {
+    } else if (topic[1] in devices.deviceList[device_id]["nodes"]) {
       // add attributes to node
-      var node = topic[2];
+      var node = topic[1];
 
-      if (topic[3] === "$name") {
+      if (topic[2] === "$name") {
         devices.deviceList[device_id]["nodes"][node]["name"] = payload;
-      } else if (topic[3] === "$type") {
+      } else if (topic[2] === "$type") {
         devices.deviceList[device_id]["nodes"][node]["type"] = payload;
-      } else if (topic[3] === "$properties") {
+      } else if (topic[2] === "$properties") {
         var properties = payload.split(",");
         for (p in properties) {
           devices.$set(
@@ -251,42 +254,42 @@ function onMessageArrived(message) {
               retained: "true",
               unit: "",
               state: "",
-              topic: `${topic[0]}/${topic[1]}/${topic[2]}/${properties[p]}`
+              topic: `${BASE_TOPIC}/${topic[0]}/${topic[1]}/${properties[p]}`
             }
           );
           client.subscribe(
-            `${topic[0]}/${topic[1]}/${topic[2]}/${properties[p]}/#`
+            `${BASE_TOPIC}/${topic[0]}/${topic[1]}/${properties[p]}/#`
           );
         }
       } else if (
-        topic[3] in devices.deviceList[device_id]["nodes"][node]["properties"]
+        topic[2] in devices.deviceList[device_id]["nodes"][node]["properties"]
       ) {
-        property = topic[3];
-        if (topic.length === 4) {
+        property = topic[2];
+        if (topic.length === 3) {
           devices.deviceList[device_id]["nodes"][node]["properties"][property][
             "state"
           ] = payload;
-        } else if (topic[4] === "$name") {
+        } else if (topic[3] === "$name") {
           devices.deviceList[device_id]["nodes"][node]["properties"][property][
             "name"
           ] = payload;
-        } else if (topic[4] === "$settable") {
+        } else if (topic[3] === "$settable") {
           devices.deviceList[device_id]["nodes"][node]["properties"][property][
             "settable"
           ] = payload;
-        } else if (topic[4] === "$datatype") {
+        } else if (topic[3] === "$datatype") {
           devices.deviceList[device_id]["nodes"][node]["properties"][property][
             "datatype"
           ] = payload;
-        } else if (topic[4] === "$format") {
+        } else if (topic[3] === "$format") {
           devices.deviceList[device_id]["nodes"][node]["properties"][property][
             "format"
           ] = payload;
-        } else if (topic[4] === "$retained") {
+        } else if (topic[3] === "$retained") {
           devices.deviceList[device_id]["nodes"][node]["properties"][property][
             "retained"
           ] = payload;
-        } else if (topic[4] === "$unit") {
+        } else if (topic[3] === "$unit") {
           devices.deviceList[device_id]["nodes"][node]["properties"][property][
             "unit"
           ] = payload;

@@ -12,5 +12,4 @@ var MQTT_USE_SSL = true;
  *  Homie discovery topic
  */
 
-// var DISCOVERY_TOPIC = "homie/+/$homie"
-var DISCOVERY_TOPIC = "+/+/$homie";
+var BASE_TOPIC = "homie";
