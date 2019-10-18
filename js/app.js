@@ -158,6 +158,9 @@ function onConnectionLost(responseObject) {
 function onMessageArrived(message) {
   // console.log("onMessageArrived: " + message.topic + " Payload: " + message.payloadString);
 
+  // ignore /set topics
+  if (message.destinationName.endsWith("/set")) { return; }
+
   var topic = message.destinationName.slice(BASE_TOPIC.length + 1).split("/");
   var payload = message.payloadString;
   var device_id = topic[0];
