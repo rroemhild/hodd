@@ -50,9 +50,6 @@ var devices = new Vue({
         s = Math.floor((t - Date.parse("1/1/70")) / 3600000) + s.substr(2);
       return s;
     },
-    changeObjectItem: function() {
-      this.$set(this.updated, true);
-    },
     wipeDevice: function(deviceId) {
       for (var i = 0; i < deviceTopics[deviceId].length; i++) {
         message = new Paho.Message("");
@@ -82,11 +79,7 @@ var devices = new Vue({
       client.send(message);
     },
     doCopy: function (t, v) {
-      this.$copyText(t).then(function (e) {
-        // console.log(e)
-      }, function (e) {
-        console.log(e)
-      })
+      this.$copyText(t);
     }
   }
 });

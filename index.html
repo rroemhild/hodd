@@ -37,11 +37,11 @@
           >
             <b-card no-body>
               <b-card-header>
-                <h6>
+                <b-card-title title-tag="h6">
                   {{ device.name }}
                   <div class="float-right">
                     <b-badge
-                      v-if="device.state === 'lost'"
+                      v-if="device.state === 'lost' || device.state === 'disconnected'"
                       href="#"
                       variant="danger"
                       @click="wipeDevice(device.id)"
@@ -51,7 +51,7 @@
                       {{ device.state }}
                     </b-badge>
                   </div>
-                </h6>
+                </b-card-title>
               </b-card-header>
 
               <b-tabs card small justified>
@@ -81,7 +81,7 @@
                     </b-list-group-item>
                     <b-list-group-item>
                       Firmware Version:
-                      <span class="float-right">v{{ device.fw_version }}</span>
+                      <span class="float-right">{{ device.fw_version }}</span>
                     </b-list-group-item>
                     <b-list-group-item>
                       IP Address:
@@ -89,7 +89,7 @@
                     </b-list-group-item>
                     <b-list-group-item>
                       MAC Address:
-                      <span class="float-right">{{ device.localip }}</span>
+                      <span class="float-right">{{ device.mac }}</span>
                     </b-list-group-item>
                   </b-list-group>
                 </b-tab>
