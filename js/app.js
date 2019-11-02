@@ -6,6 +6,7 @@
  */
 
 var deviceTopics = {};
+var deviceSubscribtions = {};
 var colorPicker = VueColor.Compact;
 
 // MQTT client
@@ -27,6 +28,7 @@ var devices = new Vue({
       message = new Paho.Message(event);
       message.destinationName = set_topic;
       message.retained = false;
+      message.qos = 1;
       client.send(message);
     },
     badge_appearance: function(state) {
@@ -53,6 +55,11 @@ var devices = new Vue({
       return s;
     },
     wipeDevice: function(deviceId) {
+      // unsubscribe from topics
+      for (var i = 0; i < deviceSubscribtions[deviceId].length; i++) {
+        client.unsubscribe(deviceSubscribtions[deviceId][i]);
+      }
+      // remove all retained messages from topics
       for (var i = 0; i < deviceTopics[deviceId].length; i++) {
         message = new Paho.Message("");
         message.destinationName = deviceTopics[deviceId][i];
@@ -60,8 +67,13 @@ var devices = new Vue({
         client.send(message);
       }
 
-      // reload the page )m
-      location.reload();
+      // remove device from objects
+      delete this.deviceList[deviceId];
+      delete deviceTopics[deviceId];
+      delete deviceSubscribtions[deviceId];
+
+      // update view
+      this.$forceUpdate();
     },
     formatToArray: function(csv) {
       // comma seperated value
@@ -161,8 +173,9 @@ var client_status = new Vue({
 
 // Initiate the mqtt client and connect to mqtt
 function connect_to_mqtt(settings) {
+
+  // disconnect before re-connect
   if (client.isConnected()) {
-    // disconnect befor re-connect
     console.log("Disconnect");
     client.disconnect();
   }
@@ -219,6 +232,13 @@ function onConnectionLost(responseObject) {
   client_status.message = "lost";
 }
 
+// subscribe to topic and keep that info
+function subscribe(deviceId, topic) {
+  client.subscribe(topic, 1);
+  deviceSubscribtions[deviceId].push(topic)
+}
+
+
 // called when a message arrives
 function onMessageArrived(message) {
   // console.log("onMessageArrived: " + message.topic + " Payload: " + message.payloadString);
@@ -232,8 +252,12 @@ function onMessageArrived(message) {
 
   // first message; add device to device list
   if (!(device_id in devices.deviceList)) {
+
+    if (!payload) { return; }
+
     // add topic to deviceTopics
     deviceTopics[device_id] = [message.destinationName];
+    deviceSubscribtions[device_id] = [];
 
     devices.$set(devices.deviceList, device_id, {
       id: device_id,
@@ -253,9 +277,9 @@ function onMessageArrived(message) {
     });
 
     // subscribe to device topics
-    client.subscribe(`${BASE_TOPIC}/${topic[0]}/+`);
-    client.subscribe(`${BASE_TOPIC}/${topic[0]}/$fw/+`);
-    client.subscribe(`${BASE_TOPIC}/${topic[0]}/$stats/+`);
+    subscribe(device_id, `${BASE_TOPIC}/${topic[0]}/+`);
+    subscribe(device_id, `${BASE_TOPIC}/${topic[0]}/$fw/+`);
+    subscribe(device_id, `${BASE_TOPIC}/${topic[0]}/$stats/+`);
   } else {
     // add topic to deviceTopics
     deviceTopics[device_id].push(message.destinationName);
@@ -296,9 +320,9 @@ function onMessageArrived(message) {
           type: "",
           properties: {}
         });
-        client.subscribe(`${BASE_TOPIC}/${topic[0]}/${nodes[n]}/$name`);
-        client.subscribe(`${BASE_TOPIC}/${topic[0]}/${nodes[n]}/$type`);
-        client.subscribe(`${BASE_TOPIC}/${topic[0]}/${nodes[n]}/$properties`);
+        subscribe(device_id, `${BASE_TOPIC}/${topic[0]}/${nodes[n]}/$name`);
+        subscribe(device_id, `${BASE_TOPIC}/${topic[0]}/${nodes[n]}/$type`);
+        subscribe(device_id, `${BASE_TOPIC}/${topic[0]}/${nodes[n]}/$properties`);
       }
     } else if (topic[1] in devices.deviceList[device_id]["nodes"]) {
       // add attributes to node
@@ -326,7 +350,7 @@ function onMessageArrived(message) {
               topic: `${BASE_TOPIC}/${topic[0]}/${topic[1]}/${properties[p]}`
             }
           );
-          client.subscribe(
+          subscribe(device_id,
             `${BASE_TOPIC}/${topic[0]}/${topic[1]}/${properties[p]}/#`
           );
         }
