@@ -50,6 +50,29 @@
               </b-form-group>
 
               <b-form-group
+                label="Port"
+                label-for="port-input"
+                invalid-feedback="Port is required"
+                                  inline
+
+              >
+                <b-form-input
+                  id="port-input"
+                  v-model="port"
+                  required
+                ></b-form-input>
+                <b-form-checkbox
+                  id="ssl-input"
+                  v-model="ssl"
+                  value="true"
+                  unchecked-value="false"
+                  class="float-right"
+                >
+                  SSL
+                </b-form-checkbox>
+              </b-form-group>
+
+              <b-form-group
                 label="Username"
                 label-for="user-input"
               >
@@ -68,28 +91,6 @@
                   v-model="pass"
                   type="password"
                 ></b-form-input>
-              </b-form-group>
-
-              <b-form-group
-                label="Port"
-                label-for="port-input"
-                invalid-feedback="Port is required"
-              >
-                <b-form-input
-                  id="port-input"
-                  v-model="port"
-                  required
-                ></b-form-input>
-              </b-form-group>
-
-              <b-form-group
-                label="SSL"
-                label-for="ssl-input"
-              >
-                <b-form-select v-model="ssl" class="mb-3" id="ssl-input">
-                  <option value="true">True</option>
-                  <option value="false">False</option>
-                </b-form-select>
               </b-form-group>
 
               <b-form-group
