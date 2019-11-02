@@ -10,7 +10,7 @@ Currently supports [Homie convention v3.0.1](https://github.com/homieiot/convent
 * Runs complete in your browser, no server side setup
 * Auto discover devices and display them in cards with all attributes, nodes and properties
 * Interact with settable properties, no data validation and only rgb support for color
-* Click on node property name to copy the node property topic to clipboard
+* Clickable clipboard icon to copy topics to clipboard
 * Bonus: Obscure JavaScript and Vue.js source code, written by a SysAdmin learning something new
 
 
