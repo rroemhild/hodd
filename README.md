@@ -16,7 +16,6 @@ Currently supports [Homie convention v3.0.1](https://github.com/homieiot/convent
 
 ### In the future
 
-* Some kind of online settings to connect to a different broker quickly
 * More bootstrap-vue, components, vue.js magic, etc.
 * Homie 4 support (partly done)
 
@@ -24,8 +23,8 @@ Currently supports [Homie convention v3.0.1](https://github.com/homieiot/convent
 ### Installation
 
 * Clone this repository or download the latest release archive
-* Copy `settings.example.js` to `settings.js` and make your changes
 * Open the `index.html` file in your browser
+* Click on `Settings` in the top-right corner
 
 
 ### Screenshot with example data
