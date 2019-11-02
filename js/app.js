@@ -6,10 +6,12 @@
  */
 
 var deviceTopics = {};
-
 var colorPicker = VueColor.Compact;
 
+// MQTT client
+var BASE_TOPIC = "homie";
 var DISCOVERY_TOPIC = `${BASE_TOPIC}/+/$homie`
+var client = new Paho.Client("localhost", 8084, clientId());
 
 
 // vue
@@ -88,7 +90,17 @@ var client_status = new Vue({
   el: "#client_status",
   data: {
     connected: false,
-    message: "disconnected"
+    message: "disconnected",
+    broker: "localhost",
+    port: 8084,
+    ssl: "true",
+    user: "",
+    pass: "",
+    reconnect: true,
+    timeout: 10,
+    clientId: clientId(),
+    topic: BASE_TOPIC,
+    autoConnect: "false"
   },
   methods: {
     badge_appearance: function(state) {
@@ -97,33 +109,93 @@ var client_status = new Vue({
       } else {
         return "warning";
       }
+    },
+    settingsHandleOK(bvModalEvt) {
+      BASE_TOPIC = this.topic
+      DISCOVERY_TOPIC = `${this.topic}/+/$homie`
+      connect_to_mqtt(this);
     }
+  },
+  mounted() {
+    if (localStorage.broker) {
+      this.broker = localStorage.broker;
+    }
+    if (localStorage.user) {
+      this.user = localStorage.user;
+    }
+    if (localStorage.pass) {
+      this.pass = localStorage.pass;
+    }
+    if (localStorage.port) {
+      this.port = localStorage.port;
+    }
+    if (localStorage.ssl) {
+      this.ssl = localStorage.ssl;
+    }
+    if (localStorage.topic) {
+      this.topic = localStorage.topic;
+    }
+  },
+  watch: {
+    broker(newBroker) {
+      localStorage.broker = newBroker;
+    },
+    user(newUser) {
+      localStorage.user = newUser;
+    },
+    pass(newPass) {
+      localStorage.pass = newPass;
+    },
+    port(newPort) {
+      localStorage.port = newPort;
+    },
+    ssl(newSSL) {
+      localStorage.ssl = newSSL;
+    },
+    topic(newTopic) {
+      localStorage.topic = newTopic;
+    },
   }
 });
 
-// MQTT Client
-var clientId =
-  "hodd_" +
+
+// Initiate the mqtt client and connect to mqtt
+function connect_to_mqtt(settings) {
+  if (client.isConnected()) {
+    // disconnect befor re-connect
+    console.log("Disconnect");
+    client.disconnect();
+  }
+
+  console.log("Connecting...");
+
+  var options = {
+    useSSL: (settings.ssl === "true"),
+    userName: settings.user,
+    password: settings.pass,
+    onSuccess: onConnect,
+    onFailure: doFail,
+    reconnect: true,
+    timeout: 10
+  };
+
+  // new client instance
+  client = new Paho.Client(settings.broker, Number(settings.port), settings.clientId);
+
+  // set callback handlers
+  client.onConnectionLost = onConnectionLost;
+  client.onMessageArrived = onMessageArrived;
+
+  client.connect(options);
+}
+
+// MQTT Client ID
+function clientId() {
+  return "hodd_" +
   Math.random()
     .toString(16)
     .substr(2, 8);
-client = new Paho.Client(MQTT_BROKER, Number(MQTT_PORT), clientId);
-
-// set callback handlers
-client.onConnectionLost = onConnectionLost;
-client.onMessageArrived = onMessageArrived;
-var options = {
-  useSSL: MQTT_USE_SSL,
-  userName: MQTT_USER,
-  password: MQTT_PASS,
-  onSuccess: onConnect,
-  onFailure: doFail,
-  reconnect: true,
-  timeout: 10
-};
-
-// connect the client
-client.connect(options);
+}
 
 function doFail(e) {
   console.log(e);
@@ -295,3 +367,4 @@ function onMessageArrived(message) {
     }
   }
 }
+

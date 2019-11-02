@@ -16,13 +16,96 @@
     <link href="css/style.css" rel="stylesheet" />
   </head>
 
-  <body>
+  <body class="modal-open">
 
     <div id="client_status">
       <b-navbar toggleable="lg" type="dark" variant="dark" fixed="top">
         <b-navbar-brand href="#">Homie Device Discovery</b-navbar-brand>
         <b-navbar-nav class="ml-auto">
-          <b-button disabled :variant="badge_appearance()" size="sm">{{ message }}</b-button>
+          <b-button
+            v-b-modal.modal-settings
+            :variant="badge_appearance()"
+            size="sm"
+          >Settings</b-button>
+
+          <b-modal
+            id="modal-settings"
+            ref="modal"
+            title="MQTT Settings"
+            ok-title="Connect"
+            @ok="settingsHandleOK"
+            visible
+          >
+            <b-form>
+              <b-form-group
+                label="Broker"
+                label-for="broker-input"
+                invalid-feedback="Broker is required"
+              >
+                <b-form-input
+                  id="broker-input"
+                  v-model="broker"
+                  required
+                ></b-form-input>
+              </b-form-group>
+
+              <b-form-group
+                label="Username"
+                label-for="user-input"
+              >
+                <b-form-input
+                  id="user-input"
+                  v-model="user"
+                ></b-form-input>
+              </b-form-group>
+
+              <b-form-group
+                label="Password"
+                label-for="pass-input"
+              >
+                <b-form-input
+                  id="pass-input"
+                  v-model="pass"
+                  type="password"
+                ></b-form-input>
+              </b-form-group>
+
+              <b-form-group
+                label="Port"
+                label-for="port-input"
+                invalid-feedback="Port is required"
+              >
+                <b-form-input
+                  id="port-input"
+                  v-model="port"
+                  required
+                ></b-form-input>
+              </b-form-group>
+
+              <b-form-group
+                label="SSL"
+                label-for="ssl-input"
+              >
+                <b-form-select v-model="ssl" class="mb-3" id="ssl-input">
+                  <option value="true">True</option>
+                  <option value="false">False</option>
+                </b-form-select>
+              </b-form-group>
+
+              <b-form-group
+                label="Base topic"
+                label-for="topic-input"
+                invalid-feedback="Base topic is required"
+              >
+                <b-form-input
+                  id="topic-input"
+                  v-model="topic"
+                  required
+                ></b-form-input>
+              </b-form-group>
+            </b-form>
+          </b-modal>
+
         </b-navbar-nav>
       </b-navbar>
     </div>
@@ -216,7 +299,6 @@
 
   <script src="js/vue.min.js" type="text/javascript"></script>
   <script src="js/bootstrap-vue.min.js" type="text/javascript"></script>
-  <script src="settings.js" type="text/javascript"></script>
   <script src="js/vue-color.min.js" type="text/javascript"></script>
   <script src="js/vue-clipboard.min.js" type="text/javascript"></script>
   <script src="js/paho-mqtt.js" type="text/javascript"></script>
