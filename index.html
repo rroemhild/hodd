@@ -12,6 +12,7 @@
 
     <link href="css/bootstrap.min.css" rel="stylesheet" />
     <link href="css/bootstrap-vue.min.css" rel="stylesheet" />
+    <link href="css/ionicons.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet" />
   </head>
 
@@ -38,7 +39,14 @@
             <b-card no-body>
               <b-card-header>
                 <b-card-title title-tag="h6">
-                  {{ device.name }}
+                  <i
+                    style="cursor: pointer;"
+                    class="icon ion-md-clipboard"
+                    v-b-popover.hover.bottomright.v-info="device.topic"
+                    @click="doCopy(device.topic, $event)"
+                  >
+                  </i> {{ device.name }}
+
                   <div class="float-right">
                     <b-badge
                       v-if="device.state === 'lost' || device.state === 'disconnected'"
@@ -127,11 +135,14 @@
                       v-bind:property="property"
                     >
                       <span
-                        v-b-popover.hover.bottomright.v-info="property.topic"
-                        title="Topic"
-                        @click="doCopy(property.topic, $event)"
+
                       >
-                        {{ property.name }}:
+                        <i
+                          style="cursor: pointer;"
+                          class="icon ion-md-clipboard"
+                          v-b-popover.hover.bottomright.v-info="property.topic"
+                          @click="doCopy(property.topic, $event)"
+                        ></i> {{ property.name }}:
                       </span>
 
                       <span class="float-right">

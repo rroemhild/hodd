@@ -1,5 +1,5 @@
 /*!
- * HoDD v0.2.0
+ * HoDD v0.3.0
    Homie Device Discovery
  * (c) 2019 Rafael Römhild
  * Released under the MIT License.
@@ -176,7 +176,8 @@ function onMessageArrived(message) {
       stats_uptime: "",
       stats_freeheap: "",
       implementation: "",
-      nodes: {}
+      nodes: {},
+      topic: `${BASE_TOPIC}/${topic[0]}`
     });
 
     // subscribe to device topics
