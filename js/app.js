@@ -106,8 +106,8 @@ var client_status = new Vue({
     broker: "localhost",
     port: 8084,
     ssl: "true",
-    user: "",
-    pass: "",
+    user: '',
+    pass: '',
     reconnect: true,
     timeout: 10,
     clientId: clientId(),
@@ -184,13 +184,18 @@ function connect_to_mqtt(settings) {
 
   var options = {
     useSSL: (settings.ssl === "true"),
-    userName: settings.user,
-    password: settings.pass,
     onSuccess: onConnect,
     onFailure: doFail,
     reconnect: true,
     timeout: 10
   };
+
+  if (settings.user !== '') {
+    options.userName = settings.user;
+    if (settings.pass !== '') {
+      options.password = settings.pass;
+    }  
+  }
 
   // new client instance
   client = new Paho.Client(settings.broker, Number(settings.port), settings.clientId);
