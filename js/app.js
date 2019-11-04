@@ -11,9 +11,8 @@ var colorPicker = VueColor.Compact;
 
 // MQTT client
 var BASE_TOPIC = "homie";
-var DISCOVERY_TOPIC = `${BASE_TOPIC}/+/$homie`
+var DISCOVERY_TOPIC = `${BASE_TOPIC}/+/$homie`;
 var client = new Paho.Client("localhost", 8084, clientId());
-
 
 // vue
 var devices = new Vue({
@@ -92,7 +91,7 @@ var devices = new Vue({
       message.retained = false;
       client.send(message);
     },
-    doCopy: function (t, v) {
+    doCopy: function(t, v) {
       this.$copyText(t);
     }
   }
@@ -106,8 +105,8 @@ var client_status = new Vue({
     broker: "localhost",
     port: 8084,
     ssl: "true",
-    user: '',
-    pass: '',
+    user: "",
+    pass: "",
     reconnect: true,
     timeout: 10,
     clientId: clientId(),
@@ -123,8 +122,8 @@ var client_status = new Vue({
       }
     },
     settingsHandleOK(bvModalEvt) {
-      BASE_TOPIC = this.topic
-      DISCOVERY_TOPIC = `${this.topic}/+/$homie`
+      BASE_TOPIC = this.topic;
+      DISCOVERY_TOPIC = `${this.topic}/+/$homie`;
       connect_to_mqtt(this);
     }
   },
@@ -166,14 +165,12 @@ var client_status = new Vue({
     },
     topic(newTopic) {
       localStorage.topic = newTopic;
-    },
+    }
   }
 });
 
-
 // Initiate the mqtt client and connect to mqtt
 function connect_to_mqtt(settings) {
-
   // disconnect before re-connect
   if (client.isConnected()) {
     console.log("Disconnect");
@@ -183,22 +180,26 @@ function connect_to_mqtt(settings) {
   console.log("Connecting...");
 
   var options = {
-    useSSL: (settings.ssl === "true"),
+    useSSL: settings.ssl === "true",
     onSuccess: onConnect,
     onFailure: doFail,
     reconnect: true,
     timeout: 10
   };
 
-  if (settings.user !== '') {
+  if (settings.user !== "") {
     options.userName = settings.user;
-    if (settings.pass !== '') {
+    if (settings.pass !== "") {
       options.password = settings.pass;
-    }  
+    }
   }
 
   // new client instance
-  client = new Paho.Client(settings.broker, Number(settings.port), settings.clientId);
+  client = new Paho.Client(
+    settings.broker,
+    Number(settings.port),
+    settings.clientId
+  );
 
   // set callback handlers
   client.onConnectionLost = onConnectionLost;
@@ -209,10 +210,12 @@ function connect_to_mqtt(settings) {
 
 // MQTT Client ID
 function clientId() {
-  return "hodd_" +
-  Math.random()
-    .toString(16)
-    .substr(2, 8);
+  return (
+    "hodd_" +
+    Math.random()
+      .toString(16)
+      .substr(2, 8)
+  );
 }
 
 function doFail(e) {
@@ -240,16 +243,17 @@ function onConnectionLost(responseObject) {
 // subscribe to topic and keep that info
 function subscribe(deviceId, topic) {
   client.subscribe(topic, 1);
-  deviceSubscribtions[deviceId].push(topic)
+  deviceSubscribtions[deviceId].push(topic);
 }
-
 
 // called when a message arrives
 function onMessageArrived(message) {
   // console.log("onMessageArrived: " + message.topic + " Payload: " + message.payloadString);
 
   // ignore /set topics
-  if (message.destinationName.endsWith("/set")) { return; }
+  if (message.destinationName.endsWith("/set")) {
+    return;
+  }
 
   var topic = message.destinationName.slice(BASE_TOPIC.length + 1).split("/");
   var payload = message.payloadString;
@@ -257,8 +261,9 @@ function onMessageArrived(message) {
 
   // first message; add device to device list
   if (!(device_id in devices.deviceList)) {
-
-    if (!payload) { return; }
+    if (!payload) {
+      return;
+    }
 
     // add topic to deviceTopics
     deviceTopics[device_id] = [message.destinationName];
@@ -327,7 +332,10 @@ function onMessageArrived(message) {
         });
         subscribe(device_id, `${BASE_TOPIC}/${topic[0]}/${nodes[n]}/$name`);
         subscribe(device_id, `${BASE_TOPIC}/${topic[0]}/${nodes[n]}/$type`);
-        subscribe(device_id, `${BASE_TOPIC}/${topic[0]}/${nodes[n]}/$properties`);
+        subscribe(
+          device_id,
+          `${BASE_TOPIC}/${topic[0]}/${nodes[n]}/$properties`
+        );
       }
     } else if (topic[1] in devices.deviceList[device_id]["nodes"]) {
       // add attributes to node
@@ -355,7 +363,8 @@ function onMessageArrived(message) {
               topic: `${BASE_TOPIC}/${topic[0]}/${topic[1]}/${properties[p]}`
             }
           );
-          subscribe(device_id,
+          subscribe(
+            device_id,
             `${BASE_TOPIC}/${topic[0]}/${topic[1]}/${properties[p]}/#`
           );
         }
@@ -396,4 +405,3 @@ function onMessageArrived(message) {
     }
   }
 }
-
