@@ -24,7 +24,12 @@ Currently supports [Homie convention v3.0.1](https://github.com/homieiot/convent
 
 * Clone this repository or download the latest release archive
 * Open the `index.html` file in your browser
-* Click on `Settings` in the top-right corner
+* Make your settings and connect
+
+
+### Requierements
+
+* MQTT broker with WebSockets
 
 
 ### Screenshot with example data
