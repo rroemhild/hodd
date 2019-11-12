@@ -34,6 +34,8 @@
             title="MQTT Settings"
             ok-title="Connect"
             @ok="settingsHandleOK"
+            @on.keyup.enter="settingsHandleOK"
+            auto-focus-button="ok"
             visible
           >
             <b-form>
