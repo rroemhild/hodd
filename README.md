@@ -4,6 +4,7 @@ HoDD is a simple client-side (Browser) app to discover [Homie](https://homieiot.
 
 Currently supports [Homie convention v3.0.1](https://github.com/homieiot/convention/releases/tag/v3.0.1) (without arrays) and Homie v4.0.0 with legacy extensions.
 
+Try it online: https://rroemhild.github.io/hodd/
 
 ### What's included
 
