@@ -1,5 +1,5 @@
 /*!
- * HoDD v0.3.0
+ * HoDD v0.4.0
    Homie Device Discovery
  * (c) 2019 Rafael Römhild
  * Released under the MIT License.
@@ -93,6 +93,12 @@ var devices = new Vue({
     },
     doCopy: function(t, v) {
       this.$copyText(t);
+    },
+    mpyCommand: function(t, v) {
+      message = new Paho.Message(v);
+      message.destinationName = t + "/$mpy";
+      message.retained = false;
+      client.send(message);
     }
   }
 });
@@ -283,7 +289,8 @@ function onMessageArrived(message) {
       stats_freeheap: "",
       implementation: "",
       nodes: {},
-      topic: `${BASE_TOPIC}/${topic[0]}`
+      topic: `${BASE_TOPIC}/${topic[0]}`,
+      extensions: []
     });
 
     // subscribe to device topics
@@ -305,6 +312,8 @@ function onMessageArrived(message) {
       devices.deviceList[device_id]["mac"] = payload;
     } else if (topic[1] === "$implementation") {
       devices.deviceList[device_id]["implementation"] = payload;
+    } else if (topic[1] === "$extensions") {
+      devices.deviceList[device_id]["extensions"] = payload.split(",");
     } else if (topic[1] === "$fw") {
       if (topic[2] === "name") {
         devices.deviceList[device_id]["fw_name"] = payload;

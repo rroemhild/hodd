@@ -157,7 +157,23 @@
                   </b-list-group>
                 </b-tab>
 
-                <b-tab title="Firmware">
+                <b-tab
+                  title="MPy"
+                  v-if="device.extensions.includes('org.microhomie.mpy:0.1.0:[4.x]')"
+                >
+                  <div>
+                    <b-button-group>
+                      <b-button squared variant="outline-primary" @click="mpyCommand(device.topic, 'reset', $event)">Reset</b-button>
+                      <b-button squared variant="outline-primary" @click="mpyCommand(device.topic, 'webrepl', $event)">WebREPL</b-button>
+                      <b-button squared variant="outline-primary" @click="mpyCommand(device.topic, 'yaota8266', $event)">Yaota8266</b-button>
+                    </b-button-group>
+                  </div>
+                </b-tab>
+
+                <b-tab
+                  title="Firmware"
+                  v-if="device.extensions.includes('org.homie.legacy-firmware:0.1.1:[4.x]') || device.homie === '3.0.1'"
+                >
                   <b-list-group>
                     <b-list-group-item>
                       Firmware Name:
@@ -178,7 +194,10 @@
                   </b-list-group>
                 </b-tab>
 
-                <b-tab title="Stats">
+                <b-tab
+                  title="Stats"
+                  v-if="device.extensions.includes('org.homie.legacy-stats:0.1.1:[4.x]') || device.homie === '3.0.1'"
+                >
                   <b-list-group>
                     <b-list-group-item>
                       Uptime:
