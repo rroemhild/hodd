@@ -26,7 +26,9 @@ Try it online: https://rroemhild.github.io/hodd/
 
 ### Requierements
 
-* MQTT broker with WebSockets
+* MQTT broker with WebSockets, like the [Mosquitto](https://mosquitto.org/) broker.
+
+If you use the Mosquitto test broker, change the port to 8081 SSL enabled.
 
 
 ### Screenshot with example data
