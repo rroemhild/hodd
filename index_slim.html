@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+    <title>Homie Device Discovery</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/bootstrap-vue.min.css" rel="stylesheet" />
+    <link href="css/ionicons.min.css" rel="stylesheet" />
+    <link href="css/style.css" rel="stylesheet" />
+  </head>
+
+  <body class="modal-open">
+    <div id="client_status">
+      <b-navbar toggleable="lg" type="dark" variant="dark" fixed="top">
+        <b-navbar-brand href="#">Homie Device Discovery</b-navbar-brand>
+        <b-navbar-nav class="ml-auto">
+          <b-button
+            v-b-modal.modal-settings
+            :variant="badge_appearance()"
+            size="sm"
+            >Settings
+          </b-button>
+
+          <b-modal
+            id="modal-settings"
+            ref="modal"
+            title="MQTT Settings"
+            ok-title="Connect"
+            @ok="settingsHandleOK"
+            @on.keyup.enter="settingsHandleOK"
+            auto-focus-button="ok"
+            visible
+          >
+            <b-form>
+              <b-form-group
+                label="Broker"
+                label-for="broker-input"
+                invalid-feedback="Broker is required"
+              >
+                <b-form-input
+                  id="broker-input"
+                  v-model="broker"
+                  required
+                ></b-form-input>
+              </b-form-group>
+
+              <b-form-group
+                label="WebSocket Port"
+                label-for="port-input"
+                invalid-feedback="Port is required"
+                inline
+              >
+                <b-form-input
+                  id="port-input"
+                  v-model="port"
+                  required
+                ></b-form-input>
+                <b-form-checkbox
+                  id="ssl-input"
+                  v-model="ssl"
+                  value="true"
+                  unchecked-value="false"
+                  class="float-right"
+                >
+                  SSL
+                </b-form-checkbox>
+              </b-form-group>
+
+              <b-form-group label="Username" label-for="user-input">
+                <b-form-input id="user-input" v-model="user"></b-form-input>
+              </b-form-group>
+
+              <b-form-group label="Password" label-for="pass-input">
+                <b-form-input
+                  id="pass-input"
+                  v-model="pass"
+                  type="password"
+                ></b-form-input>
+              </b-form-group>
+
+              <b-form-group
+                label="Base topic"
+                label-for="topic-input"
+                invalid-feedback="Base topic is required"
+              >
+                <b-form-input
+                  id="topic-input"
+                  v-model="topic"
+                  required
+                ></b-form-input>
+              </b-form-group>
+            </b-form>
+          </b-modal>
+        </b-navbar-nav>
+      </b-navbar>
+    </div>
+
+
+    <div id="app">
+      <b-container fluid>
+        <b-row>
+          <b-card-group
+            class="card-col col-sx-12 col-sm-6 col-lg-4 col-xl-3"
+            v-for="(device, index) in deviceList"
+            v-bind:device="device"
+          >
+
+            <b-modal :id="device.id" hide-footer size="lg" :title="device.name">
+              <b-tabs card small justified>
+                <b-tab title="Device">
+                  <b-list-group>
+                    <b-list-group-item>
+                      Device ID:
+                      <span class="float-right">{{ device.id }}</span>
+                    </b-list-group-item>
+                    <b-list-group-item>
+                      Homie Version:
+                      <span class="float-right">{{ device.homie }}</span>
+                    </b-list-group-item>
+                    <b-list-group-item>
+                      Implementation:
+                      <span class="float-right">
+                        {{ device.implementation }}
+                      </span>
+                    </b-list-group-item>
+                  </b-list-group>
+                </b-tab>
+
+                <b-tab
+                  title="MPy"
+                  v-if="device.extensions.includes('org.microhomie.mpy:0.1.0:[4.x]')"
+                >
+                  <div>
+                    <b-button-group>
+                      <b-button squared variant="outline-primary" @click="mpyCommand(device.topic, 'reset', $event)">Reset</b-button>
+                      <b-button squared variant="outline-primary" @click="mpyCommand(device.topic, 'webrepl', $event)">WebREPL</b-button>
+                      <b-button squared variant="outline-primary" @click="mpyCommand(device.topic, 'yaota8266', $event)">Yaota8266</b-button>
+                    </b-button-group>
+                  </div>
+                </b-tab>
+
+                <b-tab
+                  title="Firmware"
+                  v-if="device.extensions.includes('org.homie.legacy-firmware:0.1.1:[4.x]') || device.homie === '3.0.1'"
+                >
+                  <b-list-group>
+                    <b-list-group-item>
+                      Firmware Name:
+                      <span class="float-right">{{ device.fw_name }}</span>
+                    </b-list-group-item>
+                    <b-list-group-item>
+                      Firmware Version:
+                      <span class="float-right">{{ device.fw_version }}</span>
+                    </b-list-group-item>
+                    <b-list-group-item>
+                      IP Address:
+                      <span class="float-right">{{ device.localip }}</span>
+                    </b-list-group-item>
+                    <b-list-group-item>
+                      MAC Address:
+                      <span class="float-right">{{ device.mac }}</span>
+                    </b-list-group-item>
+                  </b-list-group>
+                </b-tab>
+
+                <b-tab
+                  title="Stats"
+                  v-if="device.extensions.includes('org.homie.legacy-stats:0.1.1:[4.x]') || device.homie === '3.0.1'"
+                >
+                  <b-list-group>
+                    <b-list-group-item>
+                      Uptime:
+                      <span class="float-right">
+                        {{ timeSince(device.stats_uptime) }}
+                      </span>
+                    </b-list-group-item>
+                    <b-list-group-item>
+                      Free heap:
+                      <span class="float-right">
+                        {{ device.stats_freeheap }}
+                      </span>
+                    </b-list-group-item>
+                    <b-list-group-item>
+                      Stats interval:
+                      <span class="float-right">
+                        {{ device.stats_interval }} seconds
+                      </span>
+                    </b-list-group-item>
+                  </b-list-group>
+                </b-tab>
+
+                <b-tab title="Nodes" active>
+                  <b-list-group
+                    class="card-col"
+                    v-for="(node, index) in device.nodes"
+                    v-bind:node="node"
+                  >
+                    <h6>{{ node.name }}</h6>
+                    <b-list-group-item
+                      v-for="(property, index) in node.properties"
+                      v-bind:property="property"
+                    >
+                      <span>
+                        <i
+                          style="cursor: pointer;"
+                          class="icon ion-md-clipboard"
+                          v-b-popover.hover.bottomright.v-info="property.topic"
+                          @click="doCopy(property.topic, $event)"
+                        ></i>
+                        {{ property.name }}:
+                      </span>
+
+                      <span class="float-right">
+                        <!-- datatype: boolean -->
+                        <span
+                          v-if="property.datatype === 'boolean' || property.datatype === 'bool'"
+                        >
+                          <b-form-checkbox
+                            @change="updateProperty(property.topic, $event)"
+                            v-model="property.state"
+                            v-bind:id="device.id + node.name + property.id"
+                            name="id"
+                            value="true"
+                            unchecked-value="false"
+                            :disabled="property.settable === 'false'"
+                            switch
+                          ></b-form-checkbox>
+                        </span>
+
+                        <!-- datatype: color, format: rgb -->
+                        <span
+                          v-else-if="property.datatype === 'color' && property.settable === 'true'"
+                        >
+                          <color-picker
+                            :value="stringToRGB(property.state)"
+                            @input="updateRGBColor(property.topic, $event)"
+                          ></color-picker>
+                        </span>
+
+                        <!-- datatype: enum -->
+                        <span
+                          v-else-if="property.datatype === 'enum' && property.settable === 'true'"
+                        >
+                          <b-form-select
+                            v-model="property.state"
+                            :options="formatToArray(property.format)"
+                            size="sm"
+                            @change="updateProperty(property.topic, $event)"
+                          ></b-form-select>
+                        </span>
+
+                        <!-- datatype, string, interger, float -->
+                        <span v-else-if="property.settable === 'true'">
+                          <b-form-input
+                            v-model="property.state"
+                            @change="updateProperty(property.topic, $event)"
+                            style="width: 200px; text-align: right;"
+                          ></b-form-input>
+                        </span>
+
+                        <!-- everything not catched above -->
+                        <span
+                          v-else
+                          v-b-popover.hover.bottomleft.v-info="property.datatype + ' (' + property.format + ')'"
+                          title="Datatype"
+                        >
+                          {{ property.state }}
+                          <span v-if="property.unit">{{ property.unit }}</span>
+                        </span>
+                      </span>
+                    </b-list-group-item>
+                  </b-list-group>
+                </b-tab>
+              </b-tabs>
+            </b-modal>
+
+            <b-card no-body>
+              <b-card-header
+                @click="showDeviceModal(device)"
+              >
+                <b-card-title title-tag="h6">
+                  <i
+                    style="cursor: pointer;"
+                    class="icon ion-md-clipboard"
+                    v-b-popover.hover.bottomright.v-info="device.topic"
+                    @click="doCopy(device.topic, $event)"
+                  >
+                  </i>
+                  {{ device.name }}
+
+                  <div class="float-right">
+                    <b-badge
+                      v-if="device.state === 'lost' || device.state === 'disconnected'"
+                      href="#"
+                      variant="danger"
+                      @click="wipeDevice(device.id)"
+                      >wipe</b-badge
+                    >
+                    <b-badge v-bind:variant="badge_appearance(device.state)">
+                      {{ device.state }}
+                    </b-badge>
+                  </div>
+                </b-card-title>
+              </b-card-header>
+
+            </b-card>
+          </b-card-group>
+        </b-row>
+      </b-container>
+    </div>
+  </body>
+
+  <script src="js/vue.min.js" type="text/javascript"></script>
+  <script src="js/bootstrap-vue.min.js" type="text/javascript"></script>
+  <script src="js/vue-color.min.js" type="text/javascript"></script>
+  <script src="js/vue-clipboard.min.js" type="text/javascript"></script>
+  <script src="js/paho-mqtt.js" type="text/javascript"></script>
+  <script src="js/app_slim.js" type="text/javascript"></script>
+</html>
