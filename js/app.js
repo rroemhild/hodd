@@ -252,6 +252,20 @@ function subscribe(deviceId, topic) {
   deviceSubscribtions[deviceId].push(topic);
 }
 
+// Unsubscribe from all topics to which we have previously subscribed which start with the given
+// prefix.
+function unsubscribePrefix(deviceId, topicPrefix) {
+  var remainingSubscripions = [];
+  for (topic of deviceSubscribtions[deviceId]) {
+    if (topic.startsWith(topicPrefix)) {
+      client.unsubscribe(topic);
+    } else {
+      remainingSubscripions.push(topic);
+    }
+  }
+  deviceSubscribtions[deviceId] = remainingSubscripions;
+}
+
 // called when a message arrives
 function onMessageArrived(message) {
   // console.log("onMessageArrived: " + message.topic + " Payload: " + message.payloadString);
@@ -354,6 +368,7 @@ function onMessageArrived(message) {
       for (n in devices.deviceList[device_id].nodes) {
         if (!nodes.includes(n)){
           devices.$delete(devices.deviceList[device_id].nodes, n);
+          unsubscribePrefix(device_id, `${BASE_TOPIC}/${topic[0]}/${nodes[n]}/`);
         }
       }
     } else if (topic[1] in devices.deviceList[device_id]["nodes"]) {
