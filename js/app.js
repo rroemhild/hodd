@@ -350,6 +350,12 @@ function onMessageArrived(message) {
           `${BASE_TOPIC}/${topic[0]}/${nodes[n]}/$properties`
         );
       }
+      // Remove old nodes from device object.
+      for (n in devices.deviceList[device_id].nodes) {
+        if (!nodes.includes(n)){
+          devices.$delete(devices.deviceList[device_id].nodes, n);
+        }
+      }
     } else if (topic[1] in devices.deviceList[device_id]["nodes"]) {
       // add attributes to node
       var node = topic[1];
