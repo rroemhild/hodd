@@ -332,6 +332,10 @@ function onMessageArrived(message) {
       // add nodes to device object
       var nodes = payload.split(",");
       for (n in nodes) {
+        // Don't add the node if it's already there, to avoid unnecessary UI updates.
+        if (nodes[n] in devices.deviceList[device_id].nodes) {
+          continue;
+        }
         // devices.$set(devices.deviceList.nodes, node, {});
         devices.$set(devices.deviceList[device_id].nodes, nodes[n], {
           id: nodes[n],
