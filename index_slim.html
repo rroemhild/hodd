@@ -231,7 +231,9 @@
                             unchecked-value="false"
                             :disabled="property.settable === 'false'"
                             switch
+                            style="display: inline-block;"
                           ></b-form-checkbox>
+                          <span v-if="property.unit">{{ property.unit }}</span>
                         </span>
 
                         <!-- datatype: color, format: rgb -->
@@ -242,6 +244,7 @@
                             :value="stringToRGB(property.state)"
                             @input="updateRGBColor(property.topic, $event)"
                           ></color-picker>
+                          <span v-if="property.unit">{{ property.unit }}</span>
                         </span>
 
                         <!-- datatype: enum -->
@@ -252,20 +255,23 @@
                             v-model="property.state"
                             :options="formatToArray(property.format)"
                             size="sm"
+                            style="width: fit-content;"
                             @change="updateProperty(property.topic, $event)"
                           ></b-form-select>
+                          <span v-if="property.unit">{{ property.unit }}</span>
                         </span>
 
-                        <!-- datatype, string, interger, float -->
+                        <!-- datatype, string, integer, float -->
                         <span v-else-if="property.settable === 'true'">
                           <b-form-input
                             v-model="property.state"
                             @change="updateProperty(property.topic, $event)"
-                            style="width: 200px; text-align: right;"
+                            style="width: 200px; text-align: right; display:inline-block;"
                           ></b-form-input>
+                          <span v-if="property.unit">{{ property.unit }}</span>
                         </span>
 
-                        <!-- everything not catched above -->
+                        <!-- everything not covered above -->
                         <span
                           v-else
                           v-b-popover.hover.bottomleft.v-info="property.datatype + ' (' + property.format + ')'"
