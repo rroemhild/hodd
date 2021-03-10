@@ -6,7 +6,7 @@
  */
 
 var deviceTopics = {};
-var deviceSubscribtions = {};
+var deviceSubscriptions = {};
 var colorPicker = VueColor.Compact;
 
 // MQTT client
@@ -55,8 +55,8 @@ var devices = new Vue({
     },
     wipeDevice: function(deviceId) {
       // unsubscribe from topics
-      for (var i = 0; i < deviceSubscribtions[deviceId].length; i++) {
-        client.unsubscribe(deviceSubscribtions[deviceId][i]);
+      for (var i = 0; i < deviceSubscriptions[deviceId].length; i++) {
+        client.unsubscribe(deviceSubscriptions[deviceId][i]);
       }
       // remove all retained messages from topics
       for (var i = 0; i < deviceTopics[deviceId].length; i++) {
@@ -69,7 +69,7 @@ var devices = new Vue({
       // remove device from objects
       delete this.deviceList[deviceId];
       delete deviceTopics[deviceId];
-      delete deviceSubscribtions[deviceId];
+      delete deviceSubscriptions[deviceId];
 
       // update view
       this.$forceUpdate();
@@ -257,7 +257,21 @@ function onConnectionLost(responseObject) {
 // subscribe to topic and keep that info
 function subscribe(deviceId, topic) {
   client.subscribe(topic, 1);
-  deviceSubscribtions[deviceId].push(topic);
+  deviceSubscriptions[deviceId].push(topic);
+}
+
+// Unsubscribe from all topics to which we have previously subscribed which start with the given
+// prefix.
+function unsubscribePrefix(deviceId, topicPrefix) {
+  var remainingSubscripions = [];
+  for (topic of deviceSubscriptions[deviceId]) {
+    if (topic.startsWith(topicPrefix)) {
+      client.unsubscribe(topic);
+    } else {
+      remainingSubscripions.push(topic);
+    }
+  }
+  deviceSubscriptions[deviceId] = remainingSubscripions;
 }
 
 // called when a message arrives
@@ -281,7 +295,7 @@ function onMessageArrived(message) {
 
     // add topic to deviceTopics
     deviceTopics[device_id] = [message.destinationName];
-    deviceSubscribtions[device_id] = [];
+    deviceSubscriptions[device_id] = [];
 
     devices.$set(devices.deviceList, device_id, {
       id: device_id,
@@ -339,6 +353,10 @@ function onMessageArrived(message) {
       // add nodes to device object
       var nodes = payload.split(",");
       for (n in nodes) {
+        // Don't add the node if it's already there, to avoid unnecessary UI updates.
+        if (nodes[n] in devices.deviceList[device_id].nodes) {
+          continue;
+        }
         // devices.$set(devices.deviceList.nodes, node, {});
         devices.$set(devices.deviceList[device_id].nodes, nodes[n], {
           id: nodes[n],
@@ -352,6 +370,13 @@ function onMessageArrived(message) {
           device_id,
           `${BASE_TOPIC}/${topic[0]}/${nodes[n]}/$properties`
         );
+      }
+      // Remove old nodes from device object.
+      for (n in devices.deviceList[device_id].nodes) {
+        if (!nodes.includes(n)){
+          devices.$delete(devices.deviceList[device_id].nodes, n);
+          unsubscribePrefix(device_id, `${BASE_TOPIC}/${topic[0]}/${nodes[n]}/`);
+        }
       }
     } else if (topic[1] in devices.deviceList[device_id]["nodes"]) {
       // add attributes to node
