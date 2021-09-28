@@ -387,7 +387,7 @@ function onMessageArrived(message) {
             properties[p],
             {
               id: properties[p],
-              name: "",
+              name: properties[p],
               settable: "false",
               datatype: "string",
               format: "",
