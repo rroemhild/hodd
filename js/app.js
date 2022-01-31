@@ -301,6 +301,7 @@ function onMessageArrived(message) {
       stats_interval: "",
       stats_uptime: "",
       stats_freeheap: "",
+      stats_signal: "",
       implementation: "",
       nodes: {},
       topic: `${BASE_TOPIC}/${topic[0]}`,
@@ -341,6 +342,8 @@ function onMessageArrived(message) {
         devices.deviceList[device_id]["stats_interval"] = payload;
       } else if (topic[2] === "freeheap") {
         devices.deviceList[device_id]["stats_freeheap"] = payload;
+      } else if (topic[2] === "signal") {
+        devices.deviceList[device_id]["stats_signal"] = payload;
       }
     } else if (topic[1] === "$nodes") {
       // add nodes to device object
@@ -387,7 +390,7 @@ function onMessageArrived(message) {
             properties[p],
             {
               id: properties[p],
-              name: "",
+              name: properties[p],
               settable: "false",
               datatype: "string",
               format: "",
