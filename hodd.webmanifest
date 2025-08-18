@@ -1,0 +1,37 @@
+{
+  "name": "Homie Device Discovery",
+  "short_name": "HoDD",
+  "description": "Shows Homie devices on a MQTT server.",
+  "icons": [
+    {
+      "src": "img/icon.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "img/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "img/hodd.png",
+      "type": "image/png",
+      "sizes": "1276x709",
+      "form_factor": "wide"
+    },
+    {
+      "src": "img/hodd-mobile.png",
+      "type": "image/png",
+      "sizes": "1080x2400",
+      "form_factor": "narrow"
+    }
+  ],
+  "background_color": "#ffffff",
+  "start_url": ".",
+  "id": "/hodd",
+  "display": "standalone",
+  "categories": ["networking", "utilities"],
+  "lang": "en"
+}
